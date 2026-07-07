@@ -306,7 +306,8 @@ def bump_version() -> None:
 
         if not found_at_least_one_file_needing_update:
             print(
-                f'''error: Didn't find any occurrences of "{find_pattern}" in "{path_pattern}"'''
+                f'''error: Didn't find any occurrences of "{find_pattern}" '''
+                f'''in "{path_pattern}"'''
             )
             sys.exit(1)
 

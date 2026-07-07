@@ -511,7 +511,8 @@ class TestFpdf2PdfRendererErrors:
     def test_invalid_ocr_class(self, multi_font_manager):
         """Test that non-page elements are rejected."""
         line = OcrElement(
-            ocr_class=OcrClass.LINE, bbox=BoundingBox(left=0, top=0, right=100, bottom=50)
+            ocr_class=OcrClass.LINE,
+            bbox=BoundingBox(left=0, top=0, right=100, bottom=50),
         )
 
         with pytest.raises(ValueError, match="ocr_page"):
@@ -622,9 +623,7 @@ def create_rtl_page(
         OcrElement(
             ocr_class=OcrClass.WORD,
             text=text,
-            bbox=BoundingBox(
-                left=bbox[0], top=bbox[1], right=bbox[2], bottom=bbox[3]
-            ),
+            bbox=BoundingBox(left=bbox[0], top=bbox[1], right=bbox[2], bottom=bbox[3]),
         )
         for text, bbox in words
     ]
@@ -850,8 +849,7 @@ class TestRtlTextExtraction:
         decoded = ''.join(cmap.get(g, '') for g in glyph_ids)
         logical = decoded[::-1]
         assert logical == 'שלום', (
-            f"Expected logical text 'שלום', got {logical!r} "
-            f"(stream: {decoded!r})"
+            f"Expected logical text 'שלום', got {logical!r} (stream: {decoded!r})"
         )
 
     def test_rtl_tounicode_one_to_one(self, tmp_path, multi_font_manager):

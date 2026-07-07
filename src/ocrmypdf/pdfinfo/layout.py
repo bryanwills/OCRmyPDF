@@ -59,6 +59,7 @@ def pdfsimplefont__init__(
 
 PDFSimpleFont.__init__ = pdfsimplefont__init__
 
+
 def pdftype3font__pscript5_get_height(self):
     """Monkeypatch for PScript5.dll PDFs.
 

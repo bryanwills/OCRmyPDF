@@ -158,6 +158,8 @@ quote-style = "preserve"
 # Developer-only tools - use `uv sync --group <name>`
 dev = [
     "mypy>=1.13.0",
+    "ruff>=0.14.11",
+    "prek>=0.4.8",
     "ipykernel>=6.29.5",
     "reportlab>=4.4.4",
     "cyclopts>=4.5.1",

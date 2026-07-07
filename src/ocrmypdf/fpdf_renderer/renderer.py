@@ -448,8 +448,13 @@ class Fpdf2PdfRenderer:
         # entirely (slope=0, no textangle) and produced garbage text in a
         # bounding box whose shape doesn't match the text content at all.
         if not self._check_aspect_ratio_plausible(
-            pdf, words, font_size, slope_angle_deg,
-            line_size_width, line_size_height, line_language,
+            pdf,
+            words,
+            font_size,
+            slope_angle_deg,
+            line_size_width,
+            line_size_height,
+            line_language,
         ):
             return
 
@@ -507,13 +512,15 @@ class Fpdf2PdfRenderer:
             else:
                 word_tz = 100.0
 
-            word_render_data.append(WordRenderData(
-                text=word.text,
-                x_baseline=box_llx,
-                font_family=font_family,
-                word_tz=word_tz,
-                is_rtl=word_is_rtl,
-            ))
+            word_render_data.append(
+                WordRenderData(
+                    text=word.text,
+                    x_baseline=box_llx,
+                    font_family=font_family,
+                    word_tz=word_tz,
+                    is_rtl=word_is_rtl,
+                )
+            )
 
         if not word_render_data:
             return
@@ -561,9 +568,7 @@ class Fpdf2PdfRenderer:
         if line_size_width >= line_size_height:
             return True
 
-        line_text = ' '.join(
-            w.text for w in words if w is not None and w.text
-        )
+        line_text = ' '.join(w.text for w in words if w is not None and w.text)
         if not line_text:
             return True
 
@@ -603,9 +608,7 @@ class Fpdf2PdfRenderer:
             line_text[:80],
         )
         if not self._logged_aspect_ratio_suppression:
-            log.info(
-                "Suppressing OCR output text with improbable aspect ratio"
-            )
+            log.info("Suppressing OCR output text with improbable aspect ratio")
             self._logged_aspect_ratio_suppression = True
         return False
 
@@ -679,9 +682,7 @@ class Fpdf2PdfRenderer:
             ops.append(f'{first_x_baseline:.2f} 0 Td')
         else:
             # Direct PDF coordinates
-            page_x, page_y_fpdf = transform_point(
-                baseline_matrix, first_x_baseline, 0
-            )
+            page_x, page_y_fpdf = transform_point(baseline_matrix, first_x_baseline, 0)
             page_y_pdf = page_height - page_y_fpdf
             ops.append(f'{page_x:.2f} {page_y_pdf:.2f} Td')
 
@@ -698,9 +699,7 @@ class Fpdf2PdfRenderer:
                 pdf._resource_catalog.add(
                     PDFResourceType.FONT, pdf.current_font.i, pdf.page
                 )
-                ops.append(
-                    f'/F{pdf.current_font.i} {pdf.font_size_pt:.2f} Tf'
-                )
+                ops.append(f'/F{pdf.current_font.i} {pdf.font_size_pt:.2f} Tf')
                 prev_font_family = word.font_family
 
             # Relative positioning (for words after the first)
@@ -728,12 +727,8 @@ class Fpdf2PdfRenderer:
                 advance = next_word.x_baseline - word.x_baseline
 
                 # Add trailing space for text extraction unless both are CJK
-                if (
-                    advance > 0
-                    and not (
-                        self._is_cjk_only(word.text)
-                        and self._is_cjk_only(next_word.text)
-                    )
+                if advance > 0 and not (
+                    self._is_cjk_only(word.text) and self._is_cjk_only(next_word.text)
                 ):
                     text_to_render = word.text + ' '
                 else:
@@ -744,9 +739,7 @@ class Fpdf2PdfRenderer:
             # Use word_tz (fits word into its hOCR bbox) — Td handles
             # inter-word gaps, so Tz should not stretch to fill them.
             ops.append(f'{word.word_tz:.2f} Tz')
-            ops.append(
-                self._encode_shaped_text(pdf, text_to_render, word.is_rtl)
-            )
+            ops.append(self._encode_shaped_text(pdf, text_to_render, word.is_rtl))
 
             prev_x_baseline = word.x_baseline
 
@@ -762,9 +755,7 @@ class Fpdf2PdfRenderer:
         # don't think Tz is still set from our raw operators
         pdf.font_stretching = 100
 
-    def _encode_shaped_text(
-        self, pdf: FPDF, text: str, is_rtl: bool = False
-    ) -> str:
+    def _encode_shaped_text(self, pdf: FPDF, text: str, is_rtl: bool = False) -> str:
         """Encode text using HarfBuzz text shaping for complex script support.
 
         Unlike font.encode_text() which maps unicode characters one-by-one to
