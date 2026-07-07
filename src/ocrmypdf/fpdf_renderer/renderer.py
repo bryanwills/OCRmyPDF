@@ -14,9 +14,11 @@ import unicodedata
 from dataclasses import dataclass
 from math import atan, cos, degrees, radians, sin, sqrt
 from pathlib import Path
+from typing import cast
 
 from fpdf import FPDF
 from fpdf.enums import PDFResourceType, TextMode
+from fpdf.fonts import TTFFont
 from pikepdf import Matrix, Rectangle
 
 from ocrmypdf.font import FontManager, MultiFontManager
@@ -241,10 +243,16 @@ class Fpdf2PdfRenderer:
             pdf: FPDF instance to render into
         """
         # Add page with correct dimensions
+        # fpdf2's add_page() stub says format: str, but its docstring and
+        # get_page_format() helper confirm a (width, height) tuple is
+        # supported too - the annotation on add_page() itself is just wrong.
         pdf.add_page(
-            format=(
-                self.coord_transform.page_width_pt,
-                self.coord_transform.page_height_pt,
+            format=cast(
+                'str',
+                (
+                    self.coord_transform.page_width_pt,
+                    self.coord_transform.page_height_pt,
+                ),
             )
         )
 
@@ -695,6 +703,10 @@ class Fpdf2PdfRenderer:
             # Set font if changed
             if word.font_family != prev_font_family:
                 pdf.set_font(word.font_family, size=font_size)
+                # We only ever register fonts via add_font() with a TTF file
+                # (see _register_font), so set_font() always resolves to a
+                # TTFFont, never a built-in CoreFont or leaves it unset.
+                assert pdf.current_font is not None
                 # Register font resource on this page
                 pdf._resource_catalog.add(
                     PDFResourceType.FONT, pdf.current_font.i, pdf.page
@@ -773,6 +785,10 @@ class Fpdf2PdfRenderer:
         joining forms and ligature shaping is harmless.
         """
         font = pdf.current_font
+        # We only ever register fonts via add_font() with a TTF file (see
+        # _register_font), so current_font is always a TTFFont - never the
+        # built-in CoreFont (which lacks shape_text()/escape_text()) or None.
+        assert isinstance(font, TTFFont)
         if is_rtl:
             # Reverse the text so that after bidi reversal by the text
             # extractor, the characters end up in correct logical order.
