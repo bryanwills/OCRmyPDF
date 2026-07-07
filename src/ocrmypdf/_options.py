@@ -464,7 +464,7 @@ class OcrOptions(BaseModel):
         ):
             raise ValueError(
                 "Since you specified `--output-type none`, the output file "
-                f"{self.output_file} cannot be produced. Set the output file to "
+                f"{str(self.output_file)} cannot be produced. Set the output file to "
                 f"`-` to suppress this message."
             )
         return self

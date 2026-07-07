@@ -446,7 +446,7 @@ class OcrGrafter:
         self.pdf_base.close()
         return self.output_file
 
-    def _parse_hocr_pages(self):
+    def _parse_hocr_pages(self) -> list[Fpdf2ParsedPage]:
         """Render all pages to multi-page PDF with shared fonts, then graft."""
         from ocrmypdf.hocrtransform.hocr_parser import HocrParser
 

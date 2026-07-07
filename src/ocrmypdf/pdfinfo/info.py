@@ -550,6 +550,8 @@ def main():  # pragma: no cover
     pprint(pdfinfo)
     for page in pdfinfo.pages:
         pprint(page)
+        if page is None:
+            continue
         for im in page.images:
             pprint(im)
 
