@@ -774,7 +774,9 @@ def main(infile, outfile, level, jobs=1):
     )
 
     with TemporaryDirectory() as tmpdir:
-        context = PdfContext(options, Path(tmpdir), infile, None, None)
+        # optimize() only reads context.options on this standalone path, so
+        # pdfinfo and plugin_manager are not needed.
+        context = PdfContext(options, Path(tmpdir), infile, None, None)  # type: ignore[arg-type]
         tmpout = Path(tmpdir) / 'out.pdf'
         optimize(
             infile,

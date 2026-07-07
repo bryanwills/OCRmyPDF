@@ -56,11 +56,9 @@ require_serial = true
 
 [[repos.hooks]]
 id = "mypy"
-name = "mypy (advisory — reports errors, does not fail)"
+name = "mypy"
 language = "system"
-# Errors are pre-existing debt (87 across 22 files as of 2026-07); reports but
-# never fails the hook until that debt is fixed and this can be made blocking.
-entry = "bash -c 'uv run mypy src/ocrmypdf; exit 0'"
+entry = "uv run mypy src/ocrmypdf"
 types = ["python"]
 pass_filenames = false
 require_serial = true

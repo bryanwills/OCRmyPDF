@@ -76,7 +76,8 @@ class OcrmypdfPluginManager:
         return state
 
     def __setstate__(self, state):
-        self.__init__(
+        OcrmypdfPluginManager.__init__(
+            self,
             *state['init_args'],
             plugins=state['plugins'],
             builtins=state['builtins'],
@@ -88,10 +89,10 @@ class OcrmypdfPluginManager:
 
         # 1. Register builtins
         if self._builtins:
-            for module in sorted(
+            for module_info in sorted(
                 pkgutil.iter_modules(ocrmypdf.builtin_plugins.__path__)
             ):
-                name = f'ocrmypdf.builtin_plugins.{module.name}'
+                name = f'ocrmypdf.builtin_plugins.{module_info.name}'
                 module = importlib.import_module(name)
                 self._pm.register(module)
 
@@ -99,17 +100,20 @@ class OcrmypdfPluginManager:
         self._pm.load_setuptools_entrypoints('ocrmypdf')
 
         # 3. Register plugins specified on command line
-        for name in self._plugins:
-            if isinstance(name, Path) or name.endswith('.py'):
+        for plugin in self._plugins:
+            if isinstance(plugin, Path) or plugin.endswith('.py'):
                 # Import by filename
-                module_name = Path(name).stem
-                spec = importlib.util.spec_from_file_location(module_name, name)
+                plugin_path = Path(plugin)
+                module_name = plugin_path.stem
+                spec = importlib.util.spec_from_file_location(module_name, plugin_path)
+                if spec is None or spec.loader is None:
+                    raise ImportError(f'Could not load plugin from {plugin_path}')
                 module = importlib.util.module_from_spec(spec)
                 sys.modules[module_name] = module
                 spec.loader.exec_module(module)
             else:
                 # Import by dotted module name
-                module = importlib.import_module(name)
+                module = importlib.import_module(plugin)
             self._pm.register(module)
 
     # =========================================================================
