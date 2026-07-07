@@ -337,6 +337,37 @@ def pikepdf_enable_mmap() -> None:
         log.debug("pikepdf mmap not available")
 
 
+def pikepdf_get_int(obj: pikepdf.Object, key: pikepdf.Name, default: int = 0) -> int:
+    """Look up a key on a pikepdf dictionary/stream, returning a plain int.
+
+    ``.get(key, default)``'s return type is the ambiguous ``Object | int``,
+    which does not support arithmetic or comparison against a plain int. In
+    pikepdf's default (implicit) conversion mode, a PDF Integer is already
+    unboxed to a native ``int`` by the time we see it here; under explicit
+    conversion mode it would instead be a ``pikepdf.Object``. ``int()``
+    handles both, since ``Object`` implements ``__int__``.
+    """
+    value = obj.get(key)
+    return int(value) if value is not None else default
+
+
+def pikepdf_get_bool(
+    obj: pikepdf.Object, key: pikepdf.Name, default: bool = False
+) -> bool:
+    """Look up a key on a pikepdf dictionary/stream, returning a plain bool.
+
+    Unlike ``int()``/``float()``, ``bool()`` is not supported on
+    ``pikepdf.Object`` (it raises), so both conversion modes must be
+    handled explicitly. See :func:`pikepdf_get_int` for background.
+    """
+    value = obj.get(key)
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    return value.as_bool(default)
+
+
 def running_in_docker() -> bool:
     """Returns True if we seem to be running in a Docker container."""
     return Path('/.dockerenv').exists()

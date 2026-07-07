@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import atexit
 import logging
-from collections.abc import Container, Sequence
+from collections.abc import Container
 from contextlib import contextmanager
 from functools import partial
 from pathlib import Path
@@ -84,7 +84,7 @@ def _pdf_pageinfo_concurrent(
     check_pages: Container[int],
     detailed_analysis: bool = False,
     miner_state: PdfMinerState | None = None,
-) -> Sequence[PageInfo | None]:
+) -> list[PageInfo | None]:
     pages: list[PageInfo | None] = [None] * len(pdf.pages)
 
     def update_pageinfo(page: PageInfo, pbar: ProgressBar):
