@@ -577,18 +577,6 @@ wheels = [
 ]
 
 [[package]]
-name = "deprecation"
-version = "2.1.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "packaging" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/5a/d3/8ae2869247df154b64c1884d7346d412fed0c49df84db635aab2d1c40e62/deprecation-2.1.0.tar.gz", hash = "sha256:72b3bde64e5d778694b0cf68178aed03d15e15477116add3fb773e581f9518ff", size = 173788, upload-time = "2020-04-20T14:23:38.738Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/02/c3/253a89ee03fc9b9682f1541728eb66db7db22148cd94f89ab22528cd1e1b/deprecation-2.1.0-py2.py3-none-any.whl", hash = "sha256:a10811591210e1fb0e768a8c25517cabeabcba6f0bf96564f8ff45189f90b14a", size = 11178, upload-time = "2020-04-20T14:23:36.581Z" },
-]
-
-[[package]]
 name = "docstring-parser"
 version = "0.18.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1437,7 +1425,6 @@ name = "ocrmypdf"
 version = "17.8.0"
 source = { editable = "." }
 dependencies = [
-    { name = "deprecation" },
     { name = "fpdf2" },
     { name = "img2pdf" },
     { name = "packaging" },
@@ -1449,6 +1436,7 @@ dependencies = [
     { name = "pydantic" },
     { name = "pypdfium2" },
     { name = "rich" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
     { name = "uharfbuzz" },
 ]
 
@@ -1501,7 +1489,6 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "cyclopts", marker = "extra == 'watcher'", specifier = ">=3" },
-    { name = "deprecation", specifier = ">=2.1.0" },
     { name = "fpdf2", specifier = ">=2.8.0" },
     { name = "img2pdf", specifier = ">=0.5" },
     { name = "packaging", specifier = ">=20" },
@@ -1515,6 +1502,7 @@ requires-dist = [
     { name = "python-dotenv", marker = "extra == 'watcher'" },
     { name = "rich", specifier = ">=13" },
     { name = "streamlit", marker = "extra == 'webservice'", specifier = ">=1.41.0" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13'", specifier = ">=4.12" },
     { name = "uharfbuzz", specifier = ">=0.53.2" },
     { name = "watchdog", marker = "extra == 'watcher'", specifier = ">=1.0.2" },
 ]

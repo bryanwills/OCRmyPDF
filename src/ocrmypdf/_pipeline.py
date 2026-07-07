@@ -28,7 +28,7 @@ from ocrmypdf._concurrent import Executor
 from ocrmypdf._exec import unpaper
 from ocrmypdf._jobcontext import PageContext, PdfContext
 from ocrmypdf._metadata import repair_docinfo_nuls
-from ocrmypdf._options import OcrOptions, ProcessingMode, TaggedPdfMode
+from ocrmypdf._options import OcrOptions, PathOrIO, ProcessingMode, TaggedPdfMode
 from ocrmypdf._pageboxes import log_box_repairs, repair_page_boxes
 from ocrmypdf._stdoutprotect import get_protected_stdout_fd
 from ocrmypdf.exceptions import (
@@ -1284,7 +1284,8 @@ def enumerate_compress_ranges(
         A tuple containing a range of indices and the corresponding element.
         If the element is None, the range represents a skipped range of indices.
     """
-    skipped_from, index = None, None
+    skipped_from: int | None = None
+    index: int | None = None
     for index, txt_file in enumerate(iterable):
         index += 1
         if txt_file:
@@ -1296,6 +1297,9 @@ def enumerate_compress_ranges(
             if skipped_from is None:
                 skipped_from = index
     if skipped_from is not None:
+        # skipped_from can only be set inside the loop above, so the loop
+        # must have run at least once and index is guaranteed to be an int.
+        assert index is not None
         yield (skipped_from, index), None
 
 
@@ -1322,18 +1326,12 @@ def merge_sidecars(txt_files: Iterable[Path | None], context: PdfContext) -> Pat
     return output_file
 
 
-def copy_final(
-    input_file: Path, output_file: str | Path | BinaryIO, original_file: Path | None
-) -> None:
+def copy_final(input_file: Path, output_file: PathOrIO) -> None:
     """Copy the final temporary file to the output destination.
 
     Args:
-        input_file (Path): The intermediate input file to copy.
-        output_file (str | Path | BinaryIO): The output file to copy to.
-        original_file: The original file to copy attributes from.
-
-    Returns:
-        None
+        input_file: The intermediate input file to copy.
+        output_file: The output file to copy to.
     """
     log.debug('%s -> %s', input_file, output_file)
     with input_file.open('rb') as input_stream:
@@ -1359,5 +1357,7 @@ def copy_final(
             # At this point we overwrite the output_file specified by the user
             # use copyfileobj because then we use open() to create the file and
             # get the appropriate umask, ownership, etc.
+            # The `hasattr` check above already ruled out stream-like objects.
+            assert isinstance(output_file, str | bytes | os.PathLike)
             with open(output_file, 'w+b') as output_stream:
                 copyfileobj(input_stream, output_stream)

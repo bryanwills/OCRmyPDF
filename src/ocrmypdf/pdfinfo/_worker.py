@@ -28,7 +28,7 @@ logger = logging.getLogger()
 worker_pdf = None  # pylint: disable=invalid-name
 
 
-def _pdf_pageinfo_sync_init(pdf: Pdf, infile: Path, pdfminer_loglevel):
+def _pdf_pageinfo_sync_init(pdf: Pdf | None, infile: Path, pdfminer_loglevel):
     global worker_pdf  # pylint: disable=global-statement,invalid-name
     pikepdf_enable_mmap()
 
@@ -75,13 +75,13 @@ def _pdf_pageinfo_sync(
 
 
 def _pdf_pageinfo_concurrent(
-    pdf,
+    pdf: Pdf,
     executor: Executor,
-    max_workers: int,
+    max_workers: int | None,
     use_threads: bool,
-    infile,
-    progbar,
-    check_pages,
+    infile: Path,
+    progbar: bool,
+    check_pages: Container[int],
     detailed_analysis: bool = False,
     miner_state: PdfMinerState | None = None,
 ) -> Sequence[PageInfo | None]:

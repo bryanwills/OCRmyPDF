@@ -12,7 +12,6 @@ readme = "README.md"
 license = "MPL-2.0"
 requires-python = ">=3.11"
 dependencies = [
-  "deprecation>=2.1.0",
   "fpdf2>=2.8.0",
   "img2pdf>=0.5",
   "packaging>=20",
@@ -24,6 +23,7 @@ dependencies = [
   "pydantic>=2.12.5",
   "pypdfium2>=5.0.0",
   "rich>=13",
+  "typing-extensions>=4.12; python_version < '3.13'",
   "uharfbuzz>=0.53.2",
 ]
 authors = [{ name = "James R. Barlow", email = "james@purplerock.ca" }]
@@ -101,14 +101,23 @@ filterwarnings = [
 
 [[tool.mypy.overrides]]
 module = [
-  'pluggy',
   'img2pdf',
   'pdfminer.*',
   'reportlab.*',
   'fitz',
   'libxmp.utils',
+  'pypdfium2',
+  'uharfbuzz',
+  'pi_heif',
 ]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# Test functions are not required to annotate their return type (almost
+# always None); it's a low-value hint that would just be noise here.
+module = 'tests.*'
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
 
 [tool.ruff]
 target-version = "py311"

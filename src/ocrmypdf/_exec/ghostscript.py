@@ -105,8 +105,8 @@ def _gs_devicen_reported(stream) -> bool:
 
 
 def rasterize_pdf(
-    input_file: os.PathLike,
-    output_file: os.PathLike,
+    input_file: Path,
+    output_file: Path,
     *,
     raster_device: GhostscriptRasterDevice,
     raster_dpi: Resolution,
@@ -288,7 +288,7 @@ class GhostscriptFollower:
 
 def generate_pdfa(
     pdf_pages,
-    output_file: os.PathLike,
+    output_file: Path,
     *,
     compression: str,
     color_conversion_strategy: str,

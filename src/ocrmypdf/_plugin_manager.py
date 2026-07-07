@@ -21,6 +21,7 @@ from pydantic import BaseModel
 import ocrmypdf.builtin_plugins
 from ocrmypdf import Executor, PdfContext, pluginspec
 from ocrmypdf._options import OcrOptions
+from ocrmypdf._plugin_registry import PluginOptionRegistry
 from ocrmypdf._progressbar import ProgressBar
 from ocrmypdf.helpers import Resolution
 from ocrmypdf.pluginspec import OcrEngine
@@ -53,10 +54,11 @@ class OcrmypdfPluginManager:
         self._plugins = plugins
         self._builtins = builtins
         self._pm = pluggy.PluginManager(*args, **kwargs)
+        self._option_registry: PluginOptionRegistry | None = None
         self._setup_plugins()
 
     @property
-    def pluggy(self) -> pluggy.PluginManager:
+    def pluggy_manager(self) -> pluggy.PluginManager:
         """Access the underlying pluggy.PluginManager for advanced use cases.
 
         This is useful for plugins that need to call methods like set_blocked()

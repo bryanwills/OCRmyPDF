@@ -168,7 +168,7 @@ class TesseractOptions(BaseModel):
         tess.add_argument(
             f'--{namespace}-timeout',
             default=180.0,
-            type=numeric(float, 0),
+            type=numeric(float, 0.0),
             metavar='SECONDS',
             dest=f'{namespace}_timeout',
             help=(
@@ -183,7 +183,7 @@ class TesseractOptions(BaseModel):
         tess.add_argument(
             f'--{namespace}-non-ocr-timeout',
             default=180.0,
-            type=numeric(float, 0),
+            type=numeric(float, 0.0),
             metavar='SECONDS',
             dest=f'{namespace}_non_ocr_timeout',
             help=(

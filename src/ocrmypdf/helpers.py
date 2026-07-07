@@ -18,6 +18,7 @@ from math import isclose, isfinite
 from pathlib import Path
 from statistics import harmonic_mean
 from typing import (
+    TYPE_CHECKING,
     Any,
     Generic,
     TypeVar,
@@ -25,6 +26,9 @@ from typing import (
 
 import img2pdf
 import pikepdf
+
+if TYPE_CHECKING:
+    from _typeshed import StrOrBytesPath
 
 log = logging.getLogger(__name__)
 
@@ -135,7 +139,7 @@ class Resolution(Generic[T]):
         return self._isclose(self.x, other.x) and self._isclose(self.y, other.y)
 
 
-def safe_symlink(input_file: os.PathLike, soft_link_name: os.PathLike) -> None:
+def safe_symlink(input_file: StrOrBytesPath, soft_link_name: StrOrBytesPath) -> None:
     """Create a symbolic link at ``soft_link_name``, which references ``input_file``.
 
     Think of this as copying ``input_file`` to ``soft_link_name`` with less overhead.
@@ -159,11 +163,15 @@ def safe_symlink(input_file: os.PathLike, soft_link_name: os.PathLike) -> None:
     if os.path.lexists(soft_link_name):
         # do not delete or overwrite real (non-soft link) file
         if not os.path.islink(soft_link_name):
-            raise FileExistsError(f"{soft_link_name} exists and is not a link")
+            raise FileExistsError(
+                f"{os.fsdecode(soft_link_name)} exists and is not a link"
+            )
         os.unlink(soft_link_name)
 
     if not os.path.exists(input_file):
-        raise FileNotFoundError(f"trying to create a broken symlink to {input_file}")
+        raise FileNotFoundError(
+            f"trying to create a broken symlink to {os.fsdecode(input_file)}"
+        )
 
     if os.name == 'nt':
         # Don't actually use symlinks on Windows due to permission issues
@@ -214,7 +222,7 @@ def available_cpu_count() -> int:
     return 1
 
 
-def is_file_writable(test_file: os.PathLike) -> bool:
+def is_file_writable(test_file: StrOrBytesPath) -> bool:
     """Intentionally racy test if target is writable.
 
     We intend to write to the output file if and only if we succeed and
@@ -222,7 +230,7 @@ def is_file_writable(test_file: os.PathLike) -> bool:
     the location is writable.
     """
     try:
-        p = Path(test_file)
+        p = Path(os.fsdecode(test_file))
         if p.is_symlink():
             p = p.resolve(strict=False)
 
