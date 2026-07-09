@@ -21,7 +21,6 @@ class ValidationCoordinator:
 
     def __init__(self, plugin_manager: OcrmypdfPluginManager):
         self.plugin_manager = plugin_manager
-        self.registry = plugin_manager._option_registry
 
     def validate_all_options(self, options: OcrOptions) -> None:
         """Run comprehensive validation on all options.
