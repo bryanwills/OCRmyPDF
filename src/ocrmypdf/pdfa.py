@@ -148,6 +148,23 @@ def _cid_font_is_embedded(type0_font: Dictionary) -> bool:
     return False
 
 
+def _dict_entries(resource):
+    """Return the values of a PDF resource sub-dictionary, tolerating garbage.
+
+    A ``/Font`` or ``/XObject`` resource is expected to be a dictionary, but a
+    malformed PDF -- common in OCR workloads -- may store a non-dictionary
+    object (an array, a name, an empty value) there. Calling ``.values()`` on a
+    non-dictionary raises, so return an empty list in that case rather than
+    letting the scan crash (issue #1713).
+    """
+    if resource is None:
+        return []
+    try:
+        return list(resource.values())
+    except (AttributeError, TypeError):
+        return []
+
+
 def find_nonembedded_cid_fonts(pdf: Pdf) -> set[str]:
     """Find CID-keyed (Type0) fonts that lack embedded glyph data.
 
@@ -175,21 +192,19 @@ def find_nonembedded_cid_fonts(pdf: Pdf) -> set[str]:
         if resources is None or depth > 10:
             return
         fonts = resources.get(Name.Font, None)
-        if fonts is not None:
-            for font in fonts.values():
-                try:
-                    if font.get(Name.Subtype) != Name.Type0:
-                        continue
-                    if not _cid_font_is_embedded(font):
-                        basefont = str(font.get(Name.BaseFont, '/(unnamed)'))
-                        found.add(basefont.lstrip('/'))
-                except (AttributeError, TypeError, KeyError):
+        for font in _dict_entries(fonts):
+            try:
+                if font.get(Name.Subtype) != Name.Type0:
                     continue
+                if not _cid_font_is_embedded(font):
+                    basefont = str(font.get(Name.BaseFont, '/(unnamed)'))
+                    found.add(basefont.lstrip('/'))
+            except (AttributeError, TypeError, KeyError):
+                continue
         xobjects = resources.get(Name.XObject, None)
-        if xobjects is not None:
-            for xobj in xobjects.values():
-                if xobj.get(Name.Subtype) == Name.Form and Name.Resources in xobj:
-                    scan_resources(xobj[Name.Resources], depth + 1)
+        for xobj in _dict_entries(xobjects):
+            if xobj.get(Name.Subtype) == Name.Form and Name.Resources in xobj:
+                scan_resources(xobj[Name.Resources], depth + 1)
 
     for page in pdf.pages:
         scan_resources(page.get(Name.Resources, None))
