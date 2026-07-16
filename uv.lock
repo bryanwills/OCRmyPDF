@@ -1422,7 +1422,7 @@ wheels = [
 
 [[package]]
 name = "ocrmypdf"
-version = "17.8.0"
+version = "17.8.1"
 source = { editable = "." }
 dependencies = [
     { name = "fpdf2" },

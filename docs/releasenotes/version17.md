@@ -3,6 +3,18 @@
 
 # v17
 
+## v17.8.1
+
+- Improved the `--tesseract-pagesegmode` help text to point to
+  `tesseract --help-extra`, since Tesseract 5.5.2 moved the page segmentation
+  mode documentation there from `tesseract --help`. Thanks @sokai.
+- Internal refactoring: completed a project-wide mypy type-checking pass
+  (`--check-untyped-defs` is now enabled, and the mypy pre-commit hook is now
+  blocking rather than advisory), fixing several latent edge-case bugs
+  surfaced along the way.
+- Release process improvements: migrated from pre-commit to prek for local
+  git hooks, and added a dedicated lint job to CI.
+
 ## v17.8.0
 
 - `--output-type auto` (the default) again produces PDF/A whenever it can,
