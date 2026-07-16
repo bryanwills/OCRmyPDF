@@ -6,7 +6,6 @@
 
 from __future__ import annotations
 
-import glob
 import os
 import subprocess
 import sys
@@ -282,7 +281,7 @@ def bump_version() -> None:
     actions = []
 
     for path_pattern, version_pattern in config:
-        paths = [Path(p) for p in glob.glob(path_pattern)]
+        paths = list(Path().glob(path_pattern))
 
         if not paths:
             print(f"error: Pattern {path_pattern} didn't match any files")

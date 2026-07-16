@@ -148,11 +148,11 @@ def safe_symlink(input_file: StrOrBytesPath, soft_link_name: StrOrBytesPath) -> 
     used since symlinks may require administrator privileges. An existing link at the
     destination is removed.
     """
-    input_file = os.fspath(input_file)
-    soft_link_name = os.fspath(soft_link_name)
+    input_path = Path(os.fsdecode(input_file))
+    soft_link_path = Path(os.fsdecode(soft_link_name))
 
     # Guard against soft linking to oneself
-    if input_file == soft_link_name:
+    if input_path == soft_link_path:
         log.warning(
             "No symbolic link created. You are using the original data directory "
             "as the working directory."
@@ -160,28 +160,24 @@ def safe_symlink(input_file: StrOrBytesPath, soft_link_name: StrOrBytesPath) -> 
         return
 
     # Soft link already exists: delete for relink?
-    if os.path.lexists(soft_link_name):
+    if os.path.lexists(soft_link_path):
         # do not delete or overwrite real (non-soft link) file
-        if not os.path.islink(soft_link_name):
-            raise FileExistsError(
-                f"{os.fsdecode(soft_link_name)} exists and is not a link"
-            )
-        os.unlink(soft_link_name)
+        if not soft_link_path.is_symlink():
+            raise FileExistsError(f"{soft_link_path} exists and is not a link")
+        soft_link_path.unlink()
 
-    if not os.path.exists(input_file):
-        raise FileNotFoundError(
-            f"trying to create a broken symlink to {os.fsdecode(input_file)}"
-        )
+    if not input_path.exists():
+        raise FileNotFoundError(f"trying to create a broken symlink to {input_path}")
 
     if os.name == 'nt':
         # Don't actually use symlinks on Windows due to permission issues
-        shutil.copyfile(input_file, soft_link_name)
+        shutil.copyfile(input_path, soft_link_path)
         return
 
-    log.debug("os.symlink(%s, %s)", input_file, soft_link_name)
+    log.debug("os.symlink(%s, %s)", input_path, soft_link_path)
 
     # Create symbolic link using absolute path
-    os.symlink(os.path.abspath(input_file), soft_link_name)
+    soft_link_path.symlink_to(input_path.resolve())
 
 
 def samefile(file1: os.PathLike, file2: os.PathLike) -> bool:
@@ -192,7 +188,7 @@ def samefile(file1: os.PathLike, file2: os.PathLike) -> bool:
     if os.name == 'nt':
         return file1 == file2
     else:
-        return os.path.samefile(file1, file2)
+        return Path(file1).samefile(file2)
 
 
 def is_iterable_notstr(thing: Any) -> bool:
@@ -207,7 +203,7 @@ def monotonic(seq: Sequence) -> bool:
 
 def page_number(input_file: os.PathLike) -> int:
     """Get one-based page number implied by filename (000002.pdf -> 2)."""
-    return int(os.path.basename(os.fspath(input_file))[0:6])
+    return int(Path(input_file).name[0:6])
 
 
 def available_cpu_count() -> int:
