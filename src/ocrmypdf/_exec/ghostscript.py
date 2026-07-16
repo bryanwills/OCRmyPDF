@@ -209,6 +209,7 @@ def rasterize_pdf(
             )
 
     try:
+        im: Image.Image
         with Image.open(output_file) as im:
             if needs_low_dpi_resize:
                 # Resize to the dimensions that would have resulted from the

@@ -186,7 +186,6 @@ test = [
   "python-xmp-toolkit==2.0.1", # also requires apt-get install libexempi3
   "reportlab>=3.6.8",
   # Type stubs for testing
-  "types-Pillow",
   "types-humanfriendly",
   # Extended test capabilities (merged from extended_test)
   "pymupdf>=1.24.14",

@@ -1483,7 +1483,6 @@ test = [
     { name = "python-xmp-toolkit" },
     { name = "reportlab" },
     { name = "types-humanfriendly" },
-    { name = "types-pillow" },
 ]
 
 [package.metadata]
@@ -1540,7 +1539,6 @@ test = [
     { name = "python-xmp-toolkit", specifier = "==2.0.1" },
     { name = "reportlab", specifier = ">=3.6.8" },
     { name = "types-humanfriendly" },
-    { name = "types-pillow" },
 ]
 
 [[package]]
@@ -3084,15 +3082,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/8a/26/9d3bd17958e3288f3eff4a7e5f2f8d88f7b2b95c1a2307fffe2c4f587727/types_humanfriendly-10.0.1.20250319.tar.gz", hash = "sha256:452aa1abbfff88a44cd9985eb459555bb1eae0cdd7bc084269146bfdbf1ff31d", size = 13361, upload-time = "2025-03-19T02:52:19.149Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/2c/9f/694f2a833cda25f633c0c53e1d9e65a8a46b887ed4dd30f20de22e7100ee/types_humanfriendly-10.0.1.20250319-py3-none-any.whl", hash = "sha256:0fec93cc793b91309481ed4bb9bed178ffde0076026fb3ac1cc3299ad7ecbc46", size = 14835, upload-time = "2025-03-19T02:52:17.906Z" },
-]
-
-[[package]]
-name = "types-pillow"
-version = "10.2.0.20240822"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/18/4a/4495264dddaa600d65d68bcedb64dcccf9d9da61adff51f7d2ffd8e4c9ce/types-Pillow-10.2.0.20240822.tar.gz", hash = "sha256:559fb52a2ef991c326e4a0d20accb3bb63a7ba8d40eb493e0ecb0310ba52f0d3", size = 35389, upload-time = "2024-08-22T02:32:48.15Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/66/23/e81a5354859831fcf54d488d33b80ba6133ea84f874a9c0ec40a4881e133/types_Pillow-10.2.0.20240822-py3-none-any.whl", hash = "sha256:d9dab025aba07aeb12fd50a6799d4eac52a9603488eca09d7662543983f16c5d", size = 54354, upload-time = "2024-08-22T02:32:46.664Z" },
 ]
 
 [[package]]

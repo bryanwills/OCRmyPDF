@@ -683,6 +683,7 @@ def create_ocr_image(image: Path, page_context: PageContext) -> Path:
     """
     output_file = page_context.get_path('ocr.png')
     options = page_context.options
+    im: Image.Image
     with Image.open(image) as im:
         log.debug('resolution %r', im.info['dpi'])
 
