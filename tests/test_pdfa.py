@@ -94,6 +94,52 @@ class TestFindNonembeddedCidFonts:
         with pikepdf.open(path) as pdf:
             assert find_nonembedded_cid_fonts(pdf) == {'ZZZ+Hidden'}
 
+    def test_non_dictionary_font_and_xobject_resources_are_ignored(self, tmp_path):
+        # A malformed PDF may carry a /Font or /XObject resource that is not a
+        # dictionary (an array, a name, an empty value). Scanning must skip it
+        # rather than raise when iterating its values (regression test for the
+        # crash reported in issue #1713).
+        path = tmp_path / 'malformed_resources.pdf'
+        with pikepdf.new() as pdf:
+            page = pdf.add_blank_page()
+            page.Resources = pikepdf.Dictionary(
+                Font=pikepdf.Array([]),
+                XObject=pikepdf.Array([]),
+            )
+            pdf.save(path)
+        with pikepdf.open(path) as pdf:
+            assert find_nonembedded_cid_fonts(pdf) == set()
+
+    def test_non_dictionary_font_descriptor_is_reported(self, tmp_path):
+        # A Type0 font whose descendant carries a non-dictionary /FontDescriptor
+        # has no embedded glyph data, so it must be reported -- not crash. This
+        # is the same malformed-resource bug class as #1713, one level deeper:
+        # `key in descriptor` raises ValueError on a non-dictionary.
+        path = tmp_path / 'bad_descriptor.pdf'
+        with pikepdf.new() as pdf:
+            page = pdf.add_blank_page()
+            cidfont = pdf.make_indirect(
+                pikepdf.Dictionary(
+                    Type=Name.Font,
+                    Subtype=Name.CIDFontType2,
+                    BaseFont=Name('/BOGUS+CID'),
+                    FontDescriptor=Name.NotADictionary,
+                )
+            )
+            type0 = pdf.make_indirect(
+                pikepdf.Dictionary(
+                    Type=Name.Font,
+                    Subtype=Name.Type0,
+                    BaseFont=Name('/BOGUS+CID'),
+                    Encoding=Name.Identity_H,
+                    DescendantFonts=pikepdf.Array([cidfont]),
+                )
+            )
+            page.Resources = pikepdf.Dictionary(Font=pikepdf.Dictionary(F0=type0))
+            pdf.save(path)
+        with pikepdf.open(path) as pdf:
+            assert find_nonembedded_cid_fonts(pdf) == {'BOGUS+CID'}
+
 
 @pytest.fixture
 def nonembedded_cid_pdf(tmp_path):
