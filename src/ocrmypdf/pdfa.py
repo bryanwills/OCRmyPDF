@@ -12,7 +12,7 @@ from importlib.resources import files as package_files
 from pathlib import Path
 
 import pikepdf
-from pikepdf import Array, Dictionary, Name, Pdf, Stream
+from pikepdf import Array, Dictionary, Name, Object, Pdf, Stream
 
 log = logging.getLogger(__name__)
 
@@ -137,32 +137,17 @@ def file_claims_pdfa(filename: Path):
     return pdfa_dict
 
 
-def _cid_font_is_embedded(type0_font: Dictionary) -> bool:
+def _cid_font_is_embedded(type0_font: Object) -> bool:
     """Return True if a Type0 font's CID descendant carries embedded glyphs."""
     for descendant in type0_font.get(Name.DescendantFonts, []):
         descriptor = descendant.get(Name.FontDescriptor, None)
-        if descriptor is not None and any(
+        # A malformed PDF may store a non-dictionary here; `key in descriptor`
+        # raises on those, so require a real dictionary before probing it.
+        if isinstance(descriptor, Dictionary) and any(
             key in descriptor for key in (Name.FontFile, Name.FontFile2, Name.FontFile3)
         ):
             return True
     return False
-
-
-def _dict_entries(resource):
-    """Return the values of a PDF resource sub-dictionary, tolerating garbage.
-
-    A ``/Font`` or ``/XObject`` resource is expected to be a dictionary, but a
-    malformed PDF -- common in OCR workloads -- may store a non-dictionary
-    object (an array, a name, an empty value) there. Calling ``.values()`` on a
-    non-dictionary raises, so return an empty list in that case rather than
-    letting the scan crash (issue #1713).
-    """
-    if resource is None:
-        return []
-    try:
-        return list(resource.values())
-    except (AttributeError, TypeError):
-        return []
 
 
 def find_nonembedded_cid_fonts(pdf: Pdf) -> set[str]:
@@ -191,20 +176,26 @@ def find_nonembedded_cid_fonts(pdf: Pdf) -> set[str]:
     def scan_resources(resources, depth: int = 0) -> None:
         if resources is None or depth > 10:
             return
+        # A well-formed PDF stores dictionaries under /Font and /XObject, but a
+        # malformed one (common in OCR workloads) may store an array, a name, or
+        # another non-dictionary object. Only such dictionaries have .values(),
+        # so guard with isinstance rather than let the scan crash (issue #1713).
         fonts = resources.get(Name.Font, None)
-        for font in _dict_entries(fonts):
-            try:
-                if font.get(Name.Subtype) != Name.Type0:
+        if isinstance(fonts, Dictionary):
+            for font in fonts.as_dict().values():
+                try:
+                    if font.get(Name.Subtype) != Name.Type0:
+                        continue
+                    if not _cid_font_is_embedded(font):
+                        basefont = str(font.get(Name.BaseFont, '/(unnamed)'))
+                        found.add(basefont.lstrip('/'))
+                except (AttributeError, TypeError, KeyError):
                     continue
-                if not _cid_font_is_embedded(font):
-                    basefont = str(font.get(Name.BaseFont, '/(unnamed)'))
-                    found.add(basefont.lstrip('/'))
-            except (AttributeError, TypeError, KeyError):
-                continue
         xobjects = resources.get(Name.XObject, None)
-        for xobj in _dict_entries(xobjects):
-            if xobj.get(Name.Subtype) == Name.Form and Name.Resources in xobj:
-                scan_resources(xobj[Name.Resources], depth + 1)
+        if isinstance(xobjects, Dictionary):
+            for xobj in xobjects.as_dict().values():
+                if xobj.get(Name.Subtype) == Name.Form and Name.Resources in xobj:
+                    scan_resources(xobj[Name.Resources], depth + 1)
 
     for page in pdf.pages:
         scan_resources(page.get(Name.Resources, None))
