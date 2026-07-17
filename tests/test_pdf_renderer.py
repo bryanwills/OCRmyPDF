@@ -32,7 +32,7 @@ from ocrmypdf.hocrtransform import (
 def text_from_pdf(filename: Path) -> str:
     """Extract text from a PDF file using pdfminer."""
     output_string = StringIO()
-    with open(filename, 'rb') as in_file:
+    with filename.open('rb') as in_file:
         parser = PDFParser(in_file)
         doc = PDFDocument(parser)
         rsrcmgr = PDFResourceManager()

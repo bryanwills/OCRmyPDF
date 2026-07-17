@@ -200,7 +200,7 @@ def create_input_file(options: OcrOptions, work_folder: Path) -> tuple[Path, str
         # stdin
         log.info('reading file from standard input')
         target = work_folder / 'stdin'
-        with open(target, 'wb') as stream_buffer:
+        with target.open('wb') as stream_buffer:
             copyfileobj(sys.stdin.buffer, stream_buffer)
         return target, "stdin"
     elif hasattr(options.input_file, 'readable'):
@@ -209,7 +209,7 @@ def create_input_file(options: OcrOptions, work_folder: Path) -> tuple[Path, str
             raise InputFileError("Input file stream is not readable")
         log.info('reading file from input stream')
         target = work_folder / 'stream'
-        with open(target, 'wb') as stream_buffer:
+        with target.open('wb') as stream_buffer:
             copyfileobj(input_stream, stream_buffer)
         return target, "stream"
     else:

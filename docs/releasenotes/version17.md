@@ -14,6 +14,7 @@
   surfaced along the way.
 - Release process improvements: migrated from pre-commit to prek for local
   git hooks, and added a dedicated lint job to CI.
+- Improved typing strictness for `Path`.
 
 ## v17.8.0
 
